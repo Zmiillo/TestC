@@ -1,0 +1,97 @@
+﻿@using TestC.Models
+@using Microsoft.EntityFrameworkCore.Infrastructure
+@model IndexView
+@{
+    ViewBag.Title = "Архив документов";
+}
+<form method="get">
+    <table border="0" width="100%">
+        <tr>
+            <td>
+                <a asp-action="Create" class="btn btn-dark">Добавить новый</a>
+            </td>
+            <td width="60%"></td>
+            <td>Роль</td>
+            <td align="right">
+                @Html.DropDownList("role")
+            </td>
+            <td>
+                <input type="submit" value="Сменить" class="" style="background-color: #343a40" />
+            </td>
+        </tr>
+    </table>
+    
+    <table class="table" >
+        <tr style="font-weight: bold">
+            <td>
+                <a asp-action="Index" asp-route-sortOrder="@Model.SortView.DocumentNumber" asp-route-department="@Model.FilterView.SelectedDepartment">Номер</a>
+            </td>
+            <td>
+                <a asp-action="Index" asp-route-sortOrder="@Model.SortView.DocumentDateTime" asp-route-department="@Model.FilterView.SelectedDepartment">Дата</a>
+            </td>
+            <td>
+                <a asp-action="Index" asp-route-sortOrder="@Model.SortView.DocumentType" asp-route-department="@Model.FilterView.SelectedDepartment">Вид документа</a>
+            </td>
+            <td>
+                <a asp-action="Index" asp-route-sortOrder="@Model.SortView.Department" asp-route-department="@Model.FilterView.SelectedDepartment">Цех</a>
+                <select name="department" asp-items="Model.FilterView.Departments" class="form-control"></select>
+                <input type="submit" value="Фильтр" class="btn btn-outline-dark" />
+            </td>
+            <td>
+                <a asp-action="Index" asp-route-sortOrder="@Model.SortView.Stage" asp-route-department="@Model.FilterView.SelectedDepartment">Этап</a>
+            </td>
+            <td>Номер поставки</td>
+            <td>Дата создания</td>
+            <td>Дата изменения</td>
+            <td>
+                <a asp-action="Index" asp-route-sortOrder="@Model.SortView.Barcode" asp-route-department="@Model.FilterView.SelectedDepartment">Штрихкод</a>
+            </td>
+            <td>Примечание</td>
+            <td></td>
+        </tr>
+        @foreach (var item in Model.Documents)
+        {
+            <tr @{  var clr = "white";
+                    TimeSpan time = DateTime.Now-@item.DateTimeCreate;
+                    if ((time.Hours>2)&&(time.Days==0))
+                    {
+                        clr = "LightPink";  
+                    }
+                    if ((time.Hours>3)||(time.Days>0)) 
+                    {
+                        clr = "salmon";  
+                    }
+                } bgcolor=@clr>
+                <td>@item.DocumentNumber</td>
+                <td>@item.DocumentDateTime.ToString("d")</td>
+                <td>@item.DocumentType</td>
+                <td>@item.Department</td>
+                <td>@item.Stage.GetString()</td>
+                <td>@item.NumberSupply</td>
+                <td>@item.DateTimeCreate</td>
+                <td>@item.DateTimeChange</td>
+                <td>@item.Barcode</td>
+                <td>@item.Note</td>
+                @if ((@ViewBag.roleSelect == 3) || (@ViewBag.roleSelect < 2))
+                {
+                    <td>
+                        @if (@item.Stage!=Stage.A)
+                        {
+                            <a asp-action="Index" asp-controller="Home" asp-route-id="@item.Id" asp-route-s="A" sp-route-role="@ViewBag.roleSelect" class="btn btn-link">Ввести</a> 
+                        }
+                        <a asp-action="Edit" asp-controller="Home" asp-route-id="@item.Id" class="btn btn-link">Изменить</a>
+                        <a asp-action="Delete" asp-controller="Home" asp-route-id="@item.Id" class="btn btn-link">Удалить</a>
+                    </td>
+                }    
+                @if (@ViewBag.roleSelect <= 2)
+                {
+                    <td>
+                        <a asp-action="Index" asp-controller="Home" asp-route-id="@item.Id" asp-route-s="C" asp-route-role="@ViewBag.roleSelect" class="btn btn-link">Принять</a>
+                        <a asp-action="Index" asp-controller="Home" asp-route-id="@item.Id" asp-route-s="B" asp-route-role="@ViewBag.roleSelect" class="btn btn-link">Вернуть</a>
+                    </td>
+                }
+            </tr>
+        }
+    </table>
+</form>
+
